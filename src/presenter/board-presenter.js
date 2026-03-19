@@ -1,25 +1,37 @@
-import SortView from '../view/sort-view.js';
-import EventListView from '../view/event-list-view.js';
-import PointView from '../view/point-view.js';
+import FilterView from '../view/filter-view.js';
+import Sorting from '../view/sort-view.js';
 import EditPointView from '../view/edit-point-view.js';
-import { render } from '../render.js';
+import PointView from '../view/point-view.js';
+import TripPoint from '../view/trip-point-view.js';
+import PointListView from '../view/event-list-view.js';
+import { render, RenderPosition } from '../render.js';
 
-const POINT_COUNT = 3;
+export default class TripPresenter {
+  constructor(tripModel) {
+    this.model = tripModel;
 
-export default class BoardPresenter {
-  boardComponent = new EventListView();
-
-  constructor({boardContainer}) {
-    this.boardContainer = boardContainer;
+    this.filtersContainer = document.querySelector('.trip-controls__filters');
+    this.eventsContainer = document.querySelector('.trip-events');
+    this.mainContainer = document.querySelector('.trip-main');
   }
 
   init() {
-    render(new SortView(), this.boardContainer);
-    render(this.boardComponent, this.boardContainer);
-    render(new EditPointView(), this.boardComponent.getElement());
+    const { points, destinations, offers } = this.model;
 
-    for (let i = 0; i < POINT_COUNT; i++) {
-      render(new PointView(), this.boardComponent.getElement());
-    }
+    render(new TripPoint(), this.mainContainer, RenderPosition.AFTERBEGIN);
+    render(new FilterView(), this.filtersContainer);
+    render(new Sorting(), this.eventsContainer, RenderPosition.AFTERBEGIN);
+
+    const pointListView = new PointListView();
+    render(pointListView, this.eventsContainer);
+    const pointsListContainer = pointListView.getElement();
+
+    const edPointView = new EditPointView({point: points[0], destinations, offers});
+    render(edPointView, pointsListContainer);
+
+    points.forEach((point) => {
+      const pointView = new PointView({point, destinations, offers});
+      render(pointView, pointsListContainer);
+    });
   }
 }

@@ -1,35 +1,45 @@
 import {createElement} from '../render.js';
-import {capitalizeFirstLetter} from '../utils.js';
 
-const FILTER_TYPES = ['everything', 'future', 'present', 'past'];
 
-const createFilterPanelItemTemplate = (type) => {
-  const capitalizedType = capitalizeFirstLetter(type);
-  const isChecked = type === 'everything' ? 'checked' : '';
+function createFilterTemplate() {
+  return (
+    `
+    <form class="trip-filters" action="#" method="get">
+      <div class="trip-filters__filter">
+        <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything">
+        <label class="trip-filters__filter-label" for="filter-everything">Everything</label>
+      </div>
 
-  return `
-    <div class="trip-filters__filter">
-      <input id="filter-${type}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${type}" ${isChecked}>
-      <label class="trip-filters__filter-label" for="filter-${type}">${capitalizedType}</label>
-    </div>
-  `;
-};
+      <div class="trip-filters__filter">
+        <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
+        <label class="trip-filters__filter-label" for="filter-future">Future</label>
+      </div>
 
-const createFilterPanelTemplate = () => `
-    <form class="trip-filters" action="#" method="get"> ${FILTER_TYPES.map((type) => createFilterPanelItemTemplate(type)).join('')}
+      <div class="trip-filters__filter">
+        <input id="filter-present" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="present">
+        <label class="trip-filters__filter-label" for="filter-present">Present</label>
+      </div>
+
+      <div class="trip-filters__filter">
+        <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past" checked>
+        <label class="trip-filters__filter-label" for="filter-past">Past</label>
+      </div>
+
       <button class="visually-hidden" type="submit">Accept filter</button>
-    </form>
-`;
+    </form>`
+  );
+}
 
-export default class FilterPanelView {
+export default class FilterView {
   getTemplate() {
-    return createFilterPanelTemplate();
+    return createFilterTemplate();
   }
 
   getElement() {
     if (!this.element) {
       this.element = createElement(this.getTemplate());
     }
+
     return this.element;
   }
 
