@@ -1,9 +1,6 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {EVENT_TYPES} from '../const.js';
-import {
-  formatDate,
-  formatTime,
-} from '../utils.js';
+import {formatDate, formatTime} from '../utils.js';
 
 function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
   const {
@@ -94,7 +91,6 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
               <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
             </label>
             <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox">
-
             <div class="event__type-list">
               <fieldset class="event__type-group">
                 <legend class="visually-hidden">Event type</legend>
@@ -102,7 +98,6 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
               </fieldset>
             </div>
           </div>
-
           <div class="event__field-group event__field-group--destination">
             <label class="event__label event__type-output" for="event-destination-1">
               ${type.charAt(0).toUpperCase() + type.slice(1)}
@@ -120,7 +115,6 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
               ${destinationsTemplate}
             </datalist>
           </div>
-
           <div class="event__field-group event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
             <input
@@ -140,7 +134,6 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
               value="${dateFormatted} ${timeTo}"
             >
           </div>
-
           <div class="event__field-group event__field-group--price">
             <label class="event__label" for="event-price-1">
               <span class="visually-hidden">Price</span>
@@ -156,7 +149,6 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
               required
             >
           </div>
-
           <button class="event__save-btn btn btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">${point.id ? 'Delete' : 'Cancel'}</button>
           <button class="event__rollup-btn" type="button">
@@ -172,26 +164,22 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
   `;
 }
 
-export default class EditPointView {
-  constructor({point = null, destinations = [], offers = {}}) {
-    this.point = point;
-    this.destinations = destinations;
-    this.offers = offers;
+export default class EditPointView extends AbstractView {
+  #point = null;
+  #destinations = null;
+  #offers = null;
+
+  constructor({point = null, destinations = [], offers = {}, onFormSubmit, onRollupClick}) {
+    super();
+    this.#point = point;
+    this.#destinations = destinations;
+    this.#offers = offers;
+
+    this.element.querySelector('.event--edit').addEventListener('submit', onFormSubmit);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', onRollupClick);
   }
 
-  getTemplate() {
-    return createEditPointTemplate(this.point, this.destinations, this.offers);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEditPointTemplate(this.#point, this.#destinations, this.#offers);
   }
 }

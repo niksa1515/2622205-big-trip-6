@@ -1,20 +1,8 @@
-import {createElement} from '../render.js';
-import {
-  formatDate,
-  formatTime,
-  calculateDuration,
-  formatDateTime
-} from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import {formatDate, formatTime, calculateDuration, formatDateTime} from '../utils.js';
 
 function createPointTemplate(point, destination, typeOffers) {
-  const {
-    type,
-    dateFrom,
-    dateTo,
-    basePrice,
-    offers: selectedOfferIds,
-    isFavorite
-  } = point;
+  const {type, dateFrom, dateTo, basePrice, offers: selectedOfferIds, isFavorite} = point;
 
   const dateFormatted = formatDate(dateFrom);
   const dateTimeFrom = formatDateTime(dateFrom);
@@ -22,7 +10,6 @@ function createPointTemplate(point, destination, typeOffers) {
   const timeFrom = formatTime(dateFrom);
   const timeTo = formatTime(dateTo);
   const duration = calculateDuration(dateFrom, dateTo);
-
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
   const selectedOffers = typeOffers.filter((offer) => selectedOfferIds.includes(offer.id));
@@ -73,28 +60,23 @@ function createPointTemplate(point, destination, typeOffers) {
   `;
 }
 
-export default class PointView {
-  constructor({point, destinations, offers}) {
-    this.point = point;
-    this.destinations = destinations;
-    this.offers = offers;
+export default class PointView extends AbstractView {
+  #point = null;
+  #destinations = null;
+  #offers = null;
+
+  constructor({point, destinations, offers, onEditClick}) {
+    super();
+    this.#point = point;
+    this.#destinations = destinations;
+    this.#offers = offers;
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', onEditClick);
   }
 
-  getTemplate() {
-    const destination = this.destinations.find((dest) => dest.id === this.point.destination);
-    const typeOffers = this.offers[this.point.type] || [];
-    return createPointTemplate(this.point, destination, typeOffers);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    const destination = this.#destinations.find((dest) => dest.id === this.#point.destination);
+    const typeOffers = this.#offers[this.#point.type] || [];
+    return createPointTemplate(this.#point, destination, typeOffers);
   }
 }
