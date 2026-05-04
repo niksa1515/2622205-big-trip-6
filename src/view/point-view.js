@@ -1,8 +1,21 @@
+import {
+  formatDate,
+  formatTime,
+  calculateDuration,
+  formatDateTime
+} from '../utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
-import {formatDate, formatTime, calculateDuration, formatDateTime} from '../utils.js';
+
 
 function createPointTemplate(point, destination, typeOffers) {
-  const {type, dateFrom, dateTo, basePrice, offers: selectedOfferIds, isFavorite} = point;
+  const {
+    type,
+    dateFrom,
+    dateTo,
+    basePrice,
+    offers: selectedOfferIds,
+    isFavorite
+  } = point;
 
   const dateFormatted = formatDate(dateFrom);
   const dateTimeFrom = formatDateTime(dateFrom);
@@ -10,6 +23,7 @@ function createPointTemplate(point, destination, typeOffers) {
   const timeFrom = formatTime(dateFrom);
   const timeTo = formatTime(dateTo);
   const duration = calculateDuration(dateFrom, dateTo);
+
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
   const selectedOffers = typeOffers.filter((offer) => selectedOfferIds.includes(offer.id));
@@ -27,7 +41,7 @@ function createPointTemplate(point, destination, typeOffers) {
   ` : '';
 
   return `
-    <li class="trip-events__item">
+    <li class="trip-events__item" style="list-style: none;">
       <div class="event">
         <time class="event__date" datetime="${dateTimeFrom}">${dateFormatted}</time>
         <div class="event__type">
@@ -62,21 +76,41 @@ function createPointTemplate(point, destination, typeOffers) {
 
 export default class PointView extends AbstractView {
   #point = null;
-  #destinations = null;
-  #offers = null;
+  #destination = null;
+  #typeOffers = null;
+  #handleArrowClick = null;
+  #handleStarClick = null;
 
-  constructor({point, destinations, offers, onArrowClick}) {
+  constructor({ point, destination, typeOffers, onArrowClick, onStarClick }) {
     super();
     this.#point = point;
-    this.#destinations = destinations;
-    this.#offers = offers;
+    this.#destination = destination;
+    this.#typeOffers = typeOffers || [];
+    this.#handleArrowClick = onArrowClick;
+    this.#handleStarClick = onStarClick;
 
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', onArrowClick);
+    this.setHandlers();
   }
 
   get template() {
-    const destination = this.#destinations.find((dest) => dest.id === this.#point.destination);
-    const typeOffers = this.#offers[this.#point.type] || [];
-    return createPointTemplate(this.#point, destination, typeOffers);
+    return createPointTemplate(this.#point, this.#destination, this.#typeOffers);
   }
+
+  setHandlers() {
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#ArrowClickHandler);
+
+    this.element.querySelector('.event__favorite-btn')
+      .addEventListener('click', this.#StarClickHandler);
+  }
+
+  #ArrowClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleArrowClick();
+  };
+
+  #StarClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleStarClick();
+  };
 }
