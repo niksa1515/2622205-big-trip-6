@@ -1,8 +1,12 @@
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
 import {
   EVENT_TYPES,
   CITIES,
   LOREM_IPSUM_SENTENCES
 } from './const.js';
+
+dayjs.extend(duration);
 
 const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.length)];
 
@@ -51,39 +55,30 @@ const getRandomType = () => getRandomArrayElement(EVENT_TYPES);
 
 const getRandomCity = () => getRandomArrayElement(CITIES);
 
-const MONTHS = [
-  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-];
+const formatDate = (date) => dayjs(date).format('MMM DD');
 
-const formatDate = (date) => {
-  const month = MONTHS[date.getMonth()];
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${month} ${day}`;
-};
+const formatTime = (date) => dayjs(date).format('HH:mm');
 
-const formatTime = (date) => date.toTimeString().slice(0, 5);
+const formatEditDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 
 const calculateDuration = (dateFrom, dateTo) => {
-  const diffInMs = dateTo - dateFrom;
-  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diff = dayjs.duration(dayjs(dateTo).diff(dayjs(dateFrom)));
+  const totalDays = Math.floor(diff.asDays());
+  const hours = diff.hours();
+  const minutes = diff.minutes();
 
-  const hours = Math.floor(diffInMinutes / 60);
-  const minutes = diffInMinutes % 60;
-
-  if (hours > 0) {
-    return `${hours}H ${minutes.toString().padStart(2, '0')}M`;
+  if (totalDays > 0) {
+    return `${String(totalDays).padStart(2, '0')}D ${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
   }
-  return `${minutes}M`;
+  if (hours > 0) {
+    return `${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
+  }
+  return `${String(minutes).padStart(2, '0')}M`;
 };
 
-const formatDateTime = (date) => date.toISOString().slice(0, 16);
+const formatDateTime = (date) => dayjs(date).format('YYYY-MM-DDTHH:mm');
 
-const formatDateForTitle = (date) => {
-  const month = MONTHS[date.getMonth()];
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${day} ${month.toUpperCase()}`;
-};
+const formatDateForTitle = (date) => dayjs(date).format('DD MMM').toUpperCase();
 
 const getInfoTitle = (points, destinations) => {
   if (!points || !points.length) {
@@ -161,6 +156,7 @@ export {
   getRandomCity,
   formatDate,
   formatTime,
+  formatEditDate,
   calculateDuration,
   formatDateTime,
   formatDateForTitle,
