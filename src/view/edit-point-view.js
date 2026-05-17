@@ -1,8 +1,8 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {EVENT_TYPES} from '../const.js';
 import {formatDate, formatTime} from '../utils.js';
 
-function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
+function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
   const {
     type = EVENT_TYPES[0],
     destination: destinationId = '',
@@ -10,11 +10,10 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
     dateTo = new Date(),
     basePrice = 0,
     offers: selectedOfferIds = [],
-  } = point;
+  } = state;
 
   const destination = destinations.find((dest) => dest.id === destinationId) || destinations[0] || {name: '', description: '', pictures: []};
   const typeOffers = offers[type] || [];
-  const selectedOffers = typeOffers.filter((offer) => selectedOfferIds.includes(offer.id));
 
   const dateFormatted = formatDate(dateFrom);
   const timeFrom = formatTime(dateFrom);
@@ -52,7 +51,7 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
               type="checkbox"
               name="event-offer-${offer.id}"
               value="${offer.id}"
-              ${selectedOffers.some((selected) => selected.id === offer.id) ? 'checked' : ''}
+              ${selectedOfferIds.includes(offer.id) ? 'checked' : ''}
             >
             <label class="event__offer-label" for="event-offer-${offer.id}">
               <span class="event__offer-title">${offer.title}</span>
@@ -150,7 +149,7 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
             >
           </div>
           <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">${point.id ? 'Delete' : 'Cancel'}</button>
+          <button class="event__reset-btn" type="reset">${state.id ? 'Delete' : 'Cancel'}</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
@@ -164,22 +163,67 @@ function createEditPointTemplate(point = {}, destinations = [], offers = {}) {
   `;
 }
 
-export default class EditPointView extends AbstractView {
-  #point = null;
+export default class EditPointView extends AbstractStatefulView {
   #destinations = null;
   #offers = null;
+  #submitCallback = null;
+  #arrowCallback = null;
 
   constructor({point = null, destinations = [], offers = {}, onFormSubmit, onArrowClick}) {
     super();
-    this.#point = point;
+    this._state = EditPointView.parsePointToState(point);
     this.#destinations = destinations;
     this.#offers = offers;
+    this.#submitCallback = onFormSubmit;
+    this.#arrowCallback = onArrowClick;
 
-    this.element.querySelector('.event--edit').addEventListener('submit', onFormSubmit);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', onArrowClick);
+    this._restoreHandlers();
   }
 
   get template() {
-    return createEditPointTemplate(this.#point, this.#destinations, this.#offers);
+    return createEditPointTemplate(this._state, this.#destinations, this.#offers);
+  }
+
+  _restoreHandlers() {
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#arrowCallback);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+  }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#submitCallback(EditPointView.parseStateToPoint(this._state));
+  };
+
+  #typeChangeHandler = (evt) => {
+    this.updateElement({
+      type: evt.target.value,
+      offers: [],
+    });
+  };
+
+  #destinationChangeHandler = (evt) => {
+    const matched = this.#destinations.find((dest) => dest.name === evt.target.value);
+    if (matched) {
+      this.updateElement({destination: matched.id});
+    }
+  };
+
+  static parsePointToState(point) {
+    return point
+      ? {...point}
+      : {
+        type: EVENT_TYPES[0],
+        destination: '',
+        dateFrom: new Date(),
+        dateTo: new Date(),
+        basePrice: 0,
+        offers: [],
+      };
+  }
+
+  static parseStateToPoint(state) {
+    return {...state};
   }
 }
