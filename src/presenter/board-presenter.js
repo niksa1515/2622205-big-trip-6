@@ -1,6 +1,8 @@
 import SortView from '../view/sort-view.js';
 import TripPoint from '../view/trip-point-view.js';
 import NoPointsView from '../view/no-points-view.js';
+import LoadingView from '../view/loading-view.js';
+import FailedLoadView from '../view/failed-load-view.js';
 import PointListView from '../view/event-list-view.js';
 import {render, replace, remove, RenderPosition} from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
@@ -45,21 +47,26 @@ export default class TripPresenter {
   #sortComponent = null;
   #noPointsComponent = null;
   #tripInfoComponent = null;
+  #loadingComponent = new LoadingView();
+  #failedLoadComponent = null;
   #pointListComponent = new PointListView();
+  #isLoading = true;
 
   #pointsModel = null;
   #filterModel = null;
   #newPointPresenter = null;
   #handleNewPointFormClose = null;
+  #handleLoadingComplete = null;
 
   #eventsContainer = null;
   #mainContainer = null;
   #filtersContainer = null;
 
-  constructor({pointsModel, filterModel, onNewPointFormClose = null}) {
+  constructor({pointsModel, filterModel, onNewPointFormClose = null, onLoadingComplete = null}) {
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
     this.#handleNewPointFormClose = onNewPointFormClose;
+    this.#handleLoadingComplete = onLoadingComplete;
 
     this.#eventsContainer = document.querySelector('.trip-events');
     this.#mainContainer = document.querySelector('.trip-main');
@@ -91,6 +98,11 @@ export default class TripPresenter {
   }
 
   #renderBoard() {
+    if (this.#isLoading) {
+      render(this.#loadingComponent, this.#eventsContainer);
+      return;
+    }
+
     this.#renderTripInfo();
 
     const points = this.points;
@@ -176,15 +188,24 @@ export default class TripPresenter {
       this.#noPointsComponent = null;
     }
 
+    if (this.#failedLoadComponent) {
+      remove(this.#failedLoadComponent);
+      this.#failedLoadComponent = null;
+    }
+
     if (resetSortType) {
       this.#currentSortType = SortType.DAY;
     }
   }
 
-  #handleUserAction = (actionType, updateType, update) => {
+  #handleUserAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#pointsModel.updatePoint(updateType, update);
+        try {
+          await this.#pointsModel.updatePoint(updateType, update);
+        } catch (err) {
+          // Error handling will be added in part 2
+        }
         break;
       case UserAction.ADD_POINT:
         this.#pointsModel.addPoint(updateType, update);
@@ -197,6 +218,17 @@ export default class TripPresenter {
 
   #handleModelEvent = (updateType, update) => {
     switch (updateType) {
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        if (this.#pointsModel.isFailedLoad) {
+          this.#failedLoadComponent = new FailedLoadView();
+          render(this.#failedLoadComponent, this.#eventsContainer);
+          return;
+        }
+        this.#handleLoadingComplete?.();
+        this.#renderBoard();
+        break;
       case UpdateType.PATCH:
         this.#pointPresenters.get(update.id)?.init(update);
         break;
