@@ -1,59 +1,7 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import {
-  EVENT_TYPES,
-  CITIES,
-  LOREM_IPSUM_SENTENCES
-} from './const.js';
 
 dayjs.extend(duration);
-
-const getRandomArrayElement = (items) => items[Math.floor(Math.random() * items.length)];
-
-const getRandomInteger = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-const getRandomDate = () => {
-  const now = new Date();
-  const futureDate = new Date();
-  futureDate.setDate(now.getDate() + getRandomInteger(1, 30));
-  futureDate.setHours(getRandomInteger(0, 23), getRandomInteger(0, 59));
-  return futureDate;
-};
-
-const getRandomEndDate = (startDate) => {
-  const endDate = new Date(startDate);
-  endDate.setHours(endDate.getHours() + getRandomInteger(1, 12));
-  endDate.setMinutes(getRandomInteger(0, 59));
-  return endDate;
-};
-
-const getRandomDescription = () => {
-  const sentencesCount = getRandomInteger(1, 5);
-  const selectedSentences = [];
-
-  for (let i = 0; i < sentencesCount; i++) {
-    selectedSentences.push(getRandomArrayElement(LOREM_IPSUM_SENTENCES));
-  }
-
-  return selectedSentences.join(' ');
-};
-
-const getRandomPhotoUrl = () => {
-  const randomId = getRandomInteger(1, 1000);
-  return `https://loremflickr.com/248/152?random=${randomId}`;
-};
-
-const generatePictures = () => {
-  const count = getRandomInteger(1, 5);
-  return Array.from({ length: count }, (_, i) => ({
-    src: getRandomPhotoUrl(),
-    description: `Photo ${i + 1}`
-  }));
-};
-
-const getRandomType = () => getRandomArrayElement(EVENT_TYPES);
-
-const getRandomCity = () => getRandomArrayElement(CITIES);
 
 const formatDate = (date) => dayjs(date).format('MMM DD');
 
@@ -119,7 +67,7 @@ const getInfoDates = (points) => {
 
 function getTotalCost(points, offers) {
   return points.reduce((total, point) => {
-    const pointOffers = offers[point.type];
+    const pointOffers = offers[point.type] || [];
     const selectedOffersCost = pointOffers
       .filter((offer) => point.offers.includes(offer.id))
       .reduce((sum, offer) => sum + offer.price, 0);
@@ -145,15 +93,6 @@ const countPastPoints = (points) => {
 };
 
 export {
-  getRandomArrayElement,
-  getRandomInteger,
-  getRandomDate,
-  getRandomEndDate,
-  getRandomDescription,
-  getRandomPhotoUrl,
-  generatePictures,
-  getRandomType,
-  getRandomCity,
   formatDate,
   formatTime,
   formatEditDate,
