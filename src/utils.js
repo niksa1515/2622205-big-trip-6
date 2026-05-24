@@ -33,12 +33,14 @@ const getInfoTitle = (points, destinations) => {
     return '';
   }
 
-  const destinationNames = points.map((point) => {
-    const destination = destinations.find((d) => d.id === point.destination);
-    return destination ? destination.name : '';
-  });
+  const sorted = [...points].sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
 
-  destinationNames.filter((element) => element);
+  const destinationNames = sorted
+    .map((point) => {
+      const destination = destinations.find((d) => d.id === point.destination);
+      return destination ? destination.name : '';
+    })
+    .filter(Boolean);
 
   if (destinationNames.length <= 3) {
     return destinationNames.join(' — ');
@@ -47,7 +49,7 @@ const getInfoTitle = (points, destinations) => {
   const first = destinationNames[0];
   const last = destinationNames[destinationNames.length - 1];
 
-  return `${first} —... — ${last}`;
+  return `${first} —…— ${last}`;
 };
 
 const getInfoDates = (points) => {
