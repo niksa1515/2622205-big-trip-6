@@ -13,7 +13,13 @@ function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
     basePrice = 0,
     offers: selectedOfferIds = [],
     id,
+    isSaving = false,
+    isDeleting = false,
   } = state;
+
+  const isDisabled = isSaving || isDeleting;
+  const deleteButtonText = isDeleting ? 'Deleting...' : 'Delete';
+  const resetButtonText = id ? deleteButtonText : 'Cancel';
 
   const destination = destinations.find((dest) => dest.id === destinationId) || {name: '', description: '', pictures: []};
   const typeOffers = offers[type] || [];
@@ -111,6 +117,7 @@ function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
               value="${destination.name}"
               list="destination-list-1"
               required
+              ${isDisabled ? 'disabled' : ''}
             >
             <datalist id="destination-list-1">
               ${destinationsTemplate}
@@ -124,6 +131,7 @@ function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
               type="text"
               name="event-start-time"
               value="${dateTimeFrom}"
+              ${isDisabled ? 'disabled' : ''}
             >
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
@@ -133,6 +141,7 @@ function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
               type="text"
               name="event-end-time"
               value="${dateTimeTo}"
+              ${isDisabled ? 'disabled' : ''}
             >
           </div>
           <div class="event__field-group event__field-group--price">
@@ -149,10 +158,11 @@ function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
               min="0"
               step="1"
               required
+              ${isDisabled ? 'disabled' : ''}
             >
           </div>
-          <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">${id ? 'Delete' : 'Cancel'}</button>
+          <button class="event__save-btn btn btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+          <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${resetButtonText}</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
@@ -299,9 +309,17 @@ export default class EditPointView extends AbstractStatefulView {
     this._setState({offers: currentOffers});
   };
 
+  setSaving(isSaving) {
+    this.updateElement({isSaving});
+  }
+
+  setDeleting(isDeleting) {
+    this.updateElement({isDeleting});
+  }
+
   static parsePointToState(point) {
     return point
-      ? {...point}
+      ? {...point, isSaving: false, isDeleting: false}
       : {
         type: EVENT_TYPES[0],
         destination: '',
@@ -309,10 +327,22 @@ export default class EditPointView extends AbstractStatefulView {
         dateTo: new Date(),
         basePrice: 0,
         offers: [],
+        isFavorite: false,
+        isSaving: false,
+        isDeleting: false,
       };
   }
 
   static parseStateToPoint(state) {
-    return {...state};
+    return {
+      id: state.id,
+      type: state.type,
+      destination: state.destination,
+      dateFrom: state.dateFrom,
+      dateTo: state.dateTo,
+      basePrice: state.basePrice,
+      offers: state.offers,
+      isFavorite: state.isFavorite,
+    };
   }
 }
