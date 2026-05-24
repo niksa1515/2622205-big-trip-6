@@ -4,11 +4,17 @@ import NoPointsView from '../view/no-points-view.js';
 import LoadingView from '../view/loading-view.js';
 import FailedLoadView from '../view/failed-load-view.js';
 import PointListView from '../view/event-list-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import {render, replace, remove, RenderPosition} from '../framework/render.js';
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
 import {SortType, FilterType, UserAction, UpdateType} from '../const.js';
 import {getInfoTitle, getInfoDates, getTotalCost} from '../utils.js';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 const filterPoints = (points, filterType) => {
   const now = new Date();
@@ -51,6 +57,7 @@ export default class TripPresenter {
   #failedLoadComponent = null;
   #pointListComponent = new PointListView();
   #isLoading = true;
+  #uiBlocker = new UiBlocker({lowerLimit: TimeLimit.LOWER_LIMIT, upperLimit: TimeLimit.UPPER_LIMIT});
 
   #pointsModel = null;
   #filterModel = null;
@@ -199,20 +206,21 @@ export default class TripPresenter {
   }
 
   #handleUserAction = async (actionType, updateType, update) => {
-    switch (actionType) {
-      case UserAction.UPDATE_POINT:
-        try {
+    this.#uiBlocker.block();
+    try {
+      switch (actionType) {
+        case UserAction.UPDATE_POINT:
           await this.#pointsModel.updatePoint(updateType, update);
-        } catch (err) {
-          // Error handling will be added in part 2
-        }
-        break;
-      case UserAction.ADD_POINT:
-        this.#pointsModel.addPoint(updateType, update);
-        break;
-      case UserAction.DELETE_POINT:
-        this.#pointsModel.deletePoint(updateType, update);
-        break;
+          break;
+        case UserAction.ADD_POINT:
+          await this.#pointsModel.addPoint(updateType, update);
+          break;
+        case UserAction.DELETE_POINT:
+          await this.#pointsModel.deletePoint(updateType, update);
+          break;
+      }
+    } finally {
+      this.#uiBlocker.unblock();
     }
   };
 

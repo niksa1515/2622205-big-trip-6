@@ -42,13 +42,17 @@ export default class NewPointPresenter {
     this.#handleDestroy();
   }
 
-  #handleFormSubmit = (point) => {
-    this.#handleDataChange(
-      UserAction.ADD_POINT,
-      UpdateType.MINOR,
-      {...point, id: crypto.randomUUID()},
-    );
-    this.destroy();
+  #handleFormSubmit = async (point) => {
+    this.#pointEditComponent.setSaving(true);
+    try {
+      await this.#handleDataChange(
+        UserAction.ADD_POINT,
+        UpdateType.MINOR,
+        point,
+      );
+    } catch {
+      this.#pointEditComponent.shake(() => this.#pointEditComponent.setSaving(false));
+    }
   };
 
   #handleCancelClick = () => {
