@@ -1,5 +1,5 @@
 import SortView from '../view/sort-view.js';
-import TripPoint from '../view/trip-point-view.js';
+import TripInfoView from '../view/trip-info-view.js';
 import NoPointsView from '../view/no-points-view.js';
 import LoadingView from '../view/loading-view.js';
 import FailedLoadView from '../view/failed-load-view.js';
@@ -47,7 +47,7 @@ const sortPoints = (points, sortType) => {
   }
 };
 
-export default class TripPresenter {
+export default class BoardPresenter {
   #pointPresenters = new Map();
   #currentSortType = SortType.DAY;
   #sortComponent = null;
@@ -101,6 +101,13 @@ export default class TripPresenter {
   createPoint() {
     this.#currentSortType = SortType.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    if (this.#noPointsComponent) {
+      remove(this.#noPointsComponent);
+      this.#noPointsComponent = null;
+    }
+    if (!this.#pointListComponent.element.parentElement) {
+      render(this.#pointListComponent, this.#eventsContainer);
+    }
     this.#newPointPresenter.init(this.#pointsModel.destinations, this.#pointsModel.offers);
   }
 
@@ -134,7 +141,7 @@ export default class TripPresenter {
     };
 
     const prevTripInfoComponent = this.#tripInfoComponent;
-    this.#tripInfoComponent = new TripPoint(infoData);
+    this.#tripInfoComponent = new TripInfoView(infoData);
 
     if (prevTripInfoComponent === null) {
       render(this.#tripInfoComponent, this.#mainContainer, RenderPosition.AFTERBEGIN);
@@ -186,6 +193,8 @@ export default class TripPresenter {
     this.#newPointPresenter.destroy();
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
+
+    this.#pointListComponent.element.remove();
 
     remove(this.#sortComponent);
     this.#sortComponent = null;
@@ -268,6 +277,7 @@ export default class TripPresenter {
   #handleNewPointDestroy = () => {
     this.#handleNewPointFormClose?.();
     if (this.points.length === 0) {
+      this.#pointListComponent.element.remove();
       this.#renderNoPoints();
     }
   };

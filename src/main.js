@@ -1,6 +1,6 @@
-import TripPresenter from './presenter/board-presenter.js';
+import BoardPresenter from './presenter/board-presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
-import PointsModel from './model/task-model.js';
+import PointsModel from './model/points-model.js';
 import FilterModel from './model/filter-model.js';
 import PointsApiService from './service/points-api-service.js';
 
@@ -14,7 +14,7 @@ const apiService = new PointsApiService(END_POINT, AUTHORIZATION);
 const pointsModel = new PointsModel(apiService);
 const filterModel = new FilterModel();
 
-const tripPresenter = new TripPresenter({
+const boardPresenter = new BoardPresenter({
   pointsModel,
   filterModel,
   onNewPointFormClose: () => {
@@ -32,10 +32,10 @@ const filterPresenter = new FilterPresenter({
 });
 
 newEventButton.addEventListener('click', () => {
-  tripPresenter.createPoint();
+  boardPresenter.createPoint();
   newEventButton.disabled = true;
 });
 
 filterPresenter.init();
-tripPresenter.init();
+boardPresenter.init();
 pointsModel.init();
