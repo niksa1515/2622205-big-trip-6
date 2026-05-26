@@ -20,7 +20,7 @@ function createInfoTemplate(infoData) {
   );
 }
 
-export default class TripPoint extends AbstractView {
+export default class TripInfoView extends AbstractView {
   #infoData = null;
 
   constructor(infoData) {

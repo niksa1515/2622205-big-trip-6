@@ -118,7 +118,7 @@ export default class PointPresenter {
       UserAction.UPDATE_POINT,
       UpdateType.PATCH,
       {...this.#point, isFavorite: !this.#point.isFavorite},
-    ).catch(() => {});
+    ).catch(() => this.#pointComponent.shake());
   };
 
   #handleFormSubmit = async (updatedPoint) => {

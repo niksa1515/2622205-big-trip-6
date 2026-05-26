@@ -1,3 +1,4 @@
+import he from 'he';
 import {
   formatDate,
   formatTime,
@@ -32,7 +33,7 @@ function createPointTemplate(point, destination, typeOffers) {
     <ul class="event__selected-offers">
       ${selectedOffers.map((offer) => `
         <li class="event__offer">
-          <span class="event__offer-title">${offer.title}</span>
+          <span class="event__offer-title">${he.encode(offer.title)}</span>
           &plus;&euro;&nbsp;
           <span class="event__offer-price">${offer.price}</span>
         </li>
@@ -41,13 +42,13 @@ function createPointTemplate(point, destination, typeOffers) {
   ` : '';
 
   return `
-    <li class="trip-events__item" style="list-style: none;">
+    <li class="trip-events__item">
       <div class="event">
         <time class="event__date" datetime="${dateTimeFrom}">${dateFormatted}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${type} ${destination.name}</h3>
+        <h3 class="event__title">${type} ${he.encode(destination.name)}</h3>
         <div class="event__schedule">
           <p class="event__time">
             <time class="event__start-time" datetime="${dateTimeFrom}">${timeFrom}</time>
@@ -98,18 +99,18 @@ export default class PointView extends AbstractView {
 
   setHandlers() {
     this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#ArrowClickHandler);
+      .addEventListener('click', this.#handleRollupClick);
 
     this.element.querySelector('.event__favorite-btn')
-      .addEventListener('click', this.#StarClickHandler);
+      .addEventListener('click', this.#handleFavoriteClick);
   }
 
-  #ArrowClickHandler = (evt) => {
+  #handleRollupClick = (evt) => {
     evt.preventDefault();
     this.#handleArrowClick();
   };
 
-  #StarClickHandler = (evt) => {
+  #handleFavoriteClick = (evt) => {
     evt.preventDefault();
     this.#handleStarClick();
   };
