@@ -7,7 +7,7 @@ import {formatEditDate} from '../utils.js';
 
 function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
   const {
-    type = EVENT_TYPES[0],
+    type = 'flight',
     destination: destinationId = '',
     dateFrom = new Date(),
     dateTo = new Date(),
@@ -22,7 +22,7 @@ function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
   const deleteButtonText = isDeleting ? 'Deleting...' : 'Delete';
   const resetButtonText = id ? deleteButtonText : 'Cancel';
 
-  const destination = destinations.find((dest) => dest.id === destinationId) || {name: '', description: '', pictures: []};
+  const destination = destinations.find((item) => item.id === destinationId) || {name: '', description: '', pictures: []};
   const typeOffers = offers[type] || [];
 
   const dateTimeFrom = formatEditDate(dateFrom);
@@ -286,12 +286,12 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #handleDestinationChange = (evt) => {
-    const matched = this.#destinations.find((dest) => dest.name === evt.target.value);
+    const matched = this.#destinations.find((item) => item.name === evt.target.value);
     if (matched) {
       this.updateElement({destination: matched.id});
     } else {
-      const currentDest = this.#destinations.find((dest) => dest.id === this._state.destination);
-      evt.target.value = currentDest ? currentDest.name : '';
+      const currentDestination = this.#destinations.find((item) => item.id === this._state.destination);
+      evt.target.value = currentDestination ? currentDestination.name : '';
     }
   };
 
@@ -322,7 +322,7 @@ export default class EditPointView extends AbstractStatefulView {
     return point
       ? {...point, isSaving: false, isDeleting: false}
       : {
-        type: EVENT_TYPES[0],
+        type: 'flight',
         destination: '',
         dateFrom: new Date(),
         dateTo: new Date(),

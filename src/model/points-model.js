@@ -39,9 +39,9 @@ export default class PointsModel extends Observable {
 
       this.#points = rawPoints.map(PointsModel.adaptToClient);
       this.#destinations = destinations;
-      this.#offers = rawOffers.reduce((acc, {type, offers}) => {
-        acc[type] = offers;
-        return acc;
+      this.#offers = rawOffers.reduce((result, {type, offers}) => {
+        result[type] = offers;
+        return result;
       }, {});
       this.#isFailedLoad = false;
     } catch (err) {
@@ -58,7 +58,7 @@ export default class PointsModel extends Observable {
     const serverPoint = await this.#apiService.updatePoint(update);
     const adaptedPoint = PointsModel.adaptToClient(serverPoint);
 
-    const index = this.#points.findIndex((p) => p.id === adaptedPoint.id);
+    const index = this.#points.findIndex((point) => point.id === adaptedPoint.id);
     if (index === -1) {
       throw new Error('Can\'t update non-existing point');
     }
@@ -81,7 +81,7 @@ export default class PointsModel extends Observable {
 
   async deletePoint(updateType, update) {
     await this.#apiService.deletePoint(update.id);
-    const index = this.#points.findIndex((p) => p.id === update.id);
+    const index = this.#points.findIndex((point) => point.id === update.id);
     if (index === -1) {
       throw new Error('Can\'t delete non-existing point');
     }

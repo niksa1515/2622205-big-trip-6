@@ -92,6 +92,8 @@ const countPastPoints = (points) => {
   return points.filter((point) => new Date(point.dateTo) < now).length;
 };
 
+const isEscKey = (evt) => evt.key === 'Escape';
+
 export {
   formatDate,
   formatTime,
@@ -104,5 +106,6 @@ export {
   getTotalCost,
   countFuturePoints,
   countPresentPoints,
-  countPastPoints
+  countPastPoints,
+  isEscKey
 };

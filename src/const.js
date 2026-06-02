@@ -10,8 +10,6 @@ const EVENT_TYPES = [
   'restaurant'
 ];
 
-export { EVENT_TYPES };
-
 const SortType = {
   DAY: 'sort-day',
   TIME: 'sort-time',
@@ -45,4 +43,4 @@ const NoPointsMessage = {
   [FilterType.PAST]: 'There are no past events now',
 };
 
-export { SortType, FilterType, UserAction, UpdateType, NoPointsMessage };
+export { EVENT_TYPES, SortType, FilterType, UserAction, UpdateType, NoPointsMessage };
