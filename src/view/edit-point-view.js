@@ -9,8 +9,8 @@ function createEditPointTemplate(state = {}, destinations = [], offers = {}) {
   const {
     type = 'flight',
     destination: destinationId = '',
-    dateFrom = new Date(),
-    dateTo = new Date(),
+    dateFrom = null,
+    dateTo = null,
     basePrice = 0,
     offers: selectedOfferIds = [],
     id,
@@ -324,8 +324,8 @@ export default class EditPointView extends AbstractStatefulView {
       : {
         type: 'flight',
         destination: '',
-        dateFrom: new Date(),
-        dateTo: new Date(),
+        dateFrom: null,
+        dateTo: null,
         basePrice: 0,
         offers: [],
         isFavorite: false,

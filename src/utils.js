@@ -7,7 +7,7 @@ const formatDate = (date) => dayjs(date).format('MMM DD');
 
 const formatTime = (date) => dayjs(date).format('HH:mm');
 
-const formatEditDate = (date) => dayjs(date).format('DD/MM/YY HH:mm');
+const formatEditDate = (date) => date ? dayjs(date).format('DD/MM/YY HH:mm') : '';
 
 const calculateDuration = (dateFrom, dateTo) => {
   const diff = dayjs.duration(dayjs(dateTo).diff(dayjs(dateFrom)));
